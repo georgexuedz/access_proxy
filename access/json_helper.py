@@ -8,7 +8,7 @@ from log import log
 
 
 _PACKAGE_MIN_LEN_ = 12       # 最小包长度, 包括前置 4 字节 magic_num, 4 字节 header_len, 4 字节 body_len
-_PACKAGE_MAGIC_NUM_ = (ord('*') << 24) + (ord('B') << 16) + (ord('I') << 8) + (ord('T'))
+_PACKAGE_MAGIC_NUM_ = (ord('*') << 24) + (ord('W') << 16) + (ord('H') << 8) + (ord('O'))
 
 
 def get_pkg_len(data):
