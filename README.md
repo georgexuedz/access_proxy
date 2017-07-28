@@ -13,6 +13,9 @@
     *  使用tornado的web框架。
     *  使用管道发送命令发送给设备。
 
+## access_proxy协议介绍
+![image](https://github.com/georgexuedz/access_proxy/raw/master/image/access_proxy_protocol.jpg)
+
 ## 有问题反馈
 在使用中有任何问题，欢迎反馈给我，可以用以下联系方式跟我交流
 
