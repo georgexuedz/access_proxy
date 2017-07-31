@@ -75,12 +75,14 @@ class Proxy:
         self.seq_no             = random.randint(0, 100000000)
         self.my_mid             = 10100
 
+	'''
         self.redis_o = redis.Redis(
             host='localhost',
             port=6379,
             db=0
         )
         self.redis_mac_set_key = 'redis_mac_set'
+	'''
 
         log.init({
             'module': 'access',
@@ -292,11 +294,14 @@ class Proxy:
 
     def deal_device_conneted_msg(self, fd_info, header):
         mac = header_helper.get_mac(header)
+	
+	'''
         if not self.redis_o.sismember(
                 self.redis_mac_set_key,
                 mac):
             log.error("![unbinded mac device]")
             return False
+	'''
 
         self.mac_map[mac] = fd_info['fd']
         log.debug("fd(%d) bind to mac(%s)", fd_info['fd'], mac)
