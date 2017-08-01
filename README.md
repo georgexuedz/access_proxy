@@ -3,6 +3,11 @@
 
 ![image](https://github.com/georgexuedz/access_proxy/raw/master/image/access_proxy.jpg)
 
+## 安装使用
+* pip install tornado
+* pip install ConcurrentLogHandler
+* mkdir -p /data/logs/service/access/
+
 ## access_proxy实现细节介绍
 
 * 一个tcp服务端
