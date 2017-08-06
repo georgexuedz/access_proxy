@@ -75,14 +75,11 @@ class Proxy:
         self.seq_no             = random.randint(0, 100000000)
         self.my_mid             = 10100
 
-	'''
         self.redis_o = redis.Redis(
             host='localhost',
             port=6379,
             db=0
         )
-        self.redis_mac_set_key = 'redis_mac_set'
-	'''
 
         log.init({
             'module': 'access',
@@ -157,6 +154,14 @@ class Proxy:
         conn = self.fd_map[fd]["conn"]
         del self.fd_map[fd]
         conn.close()  #因为fd有引用的时候，就不会发fin包，所以先拷贝出来，删除map以后再最后close
+
+        del_mac = ''
+        for MAC, FD in self.mac_map.iteritems():
+            if FD == fd:
+                del_mac = MAC
+        if del_mac in self.mac_map:
+            del self.mac_map[del_mac]
+
 
     def check_timeout(self):
         #这里需要遍历所有的fd，应该放在一个线程里面去检查的，这样子会效率更高，先简单做
@@ -294,14 +299,11 @@ class Proxy:
 
     def deal_device_conneted_msg(self, fd_info, header):
         mac = header_helper.get_mac(header)
-	
-	'''
-        if not self.redis_o.sismember(
-                self.redis_mac_set_key,
+        if not self.redis_o.hget(
+                'mac_openid',
                 mac):
             log.error("![unbinded mac device]")
             return False
-	'''
 
         self.mac_map[mac] = fd_info['fd']
         log.debug("fd(%d) bind to mac(%s)", fd_info['fd'], mac)
@@ -309,8 +311,15 @@ class Proxy:
 
     def send_buf_to_dst_fd(self, fd_info, dst_fd):
         self.fd_map[dst_fd]["send_buff"]   += fd_info["recv_buff"]
-        fd_info["recv_buff"]       = ''
+        fd_info["recv_buff"] = ''
         fd_info["recv_len_needed"] = 0
+
+    def send_device_offline_response(self, fd_info, header):
+        offline_header = header_helper.get_offline_header()
+        offline_header['seq'] = header[header_helper._g_header_seq_key]
+        fd_info["recv_buff"] = json_helper.pack_one_msg(
+            offline_header
+        )
 
     def add_data2dst_fd_buff_no_seq(self, header, fd_info):
         dst_fd = -1
@@ -325,12 +334,12 @@ class Proxy:
                 return True
             elif fd_info["type"] == _g_fd_type_push:
                 # 请求设备
-                # dst_fd = xxx
                 dst_fd = self.deal_sendcmd_to_device(header, fd_info)
                 if dst_fd == -1:
-                    fd_info["recv_buff"]       = ''
-                    fd_info["recv_len_needed"] = 0
-                    return False
+                    log.error("![offline device]")
+                    # 设备离线，响应离线消息
+                    self.send_device_offline_response(fd_info, header)
+                    dst_fd = self.push_fd
         else:
             if fd_info["type"] == _g_fd_type_socket:
                 # 设备响应

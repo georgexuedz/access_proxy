@@ -161,7 +161,6 @@ class HProxy:
                     continue
 
                 callback, push_seq = session_keeper.pop_session_rsp_func(header['seq'])
-                
                 if not callback:
                     log.error("[HPROXY] package seqno (%d) not found! drop it!!!!" % (header['seq']))
                     continue

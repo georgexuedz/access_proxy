@@ -8,7 +8,7 @@ from log import log
 
 
 _PACKAGE_MIN_LEN_ = 12       # 最小包长度, 包括前置 4 字节 magic_num, 4 字节 header_len, 4 字节 body_len
-_PACKAGE_MAGIC_NUM_ = (ord('*') << 24) + (ord('W') << 16) + (ord('H') << 8) + (ord('O'))
+_PACKAGE_MAGIC_NUM_ = (ord('*') << 24) + (ord('B') << 16) + (ord('I') << 8) + (ord('T'))
 
 
 def get_pkg_len(data):
@@ -33,6 +33,27 @@ def extra_pre_msg(data):
         return False, 0, 0
 
     return True, header_len, body_len
+
+
+def pack_one_msg(header, body=None):
+    try:
+        if not header:
+            return ''
+        header_data = json.dumps(header)
+        header_len = len(header_data)
+
+        body_len = 0
+        body_data = ''
+        if body:
+            body_data = json.dumps(body)
+            body_len = len(body_data)
+
+        data = struct.pack('!3I', _PACKAGE_MAGIC_NUM_, header_len, body_len)
+        data += header_data + body_data
+        return data
+    except Exception, e:
+        log.error("pack_one_msg err!" + str(e))
+        return ''
 
 
 def replace_header(data, new_header):

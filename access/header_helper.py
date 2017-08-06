@@ -15,6 +15,15 @@ _g_header_openid_key = 'openid'
 _g_header_seq_key = 'seq'
 _g_header_code_key = 'code'
 
+_g_header_code_offline = 3333
+
+
+def get_offline_header():
+    return {
+        _g_header_type_key: _g_header_type_rsp,
+        _g_header_code_key: _g_header_code_offline
+    }
+
 
 def serialize_header(header):
     return json.dumps(header)
